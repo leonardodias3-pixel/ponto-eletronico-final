@@ -1,2 +1,5 @@
 /mvnw text eol=lf
 *.cmd text eol=crlf
+
+# Para arquivos .properties, SEMPRE use o final de linha do Linux (LF)
+*.properties text eol=lf
