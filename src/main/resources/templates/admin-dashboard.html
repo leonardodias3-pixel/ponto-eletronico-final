@@ -4,29 +4,31 @@
     <meta charset="UTF-8">
     <title>Admin Dashboard</title>
     <link rel="stylesheet" th:href="@{/css/style.css}" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 </head>
 <body>
 <div class="dashboard-container">
     <header class="dashboard-header">
-        <h1>Admin Dashboard</h1>
+        <div class="logo">
+            <i class="fa-solid fa-user-shield"></i> Painel do Admin
+        </div>
         <div class="user-info">
             <span>Olá, <b th:text="${nomeUsuario}">Admin</b>!</span>
-            <a href="/logout" style="color: #ff8a8a; text-decoration: none;">Sair</a>
+            <a href="/logout"><i class="fa-solid fa-right-from-bracket"></i> Sair</a>
         </div>
     </header>
 
     <div class="card" style="grid-column: 1 / -1;">
-        <h2>Relatórios Individuais</h2>
+        <h2><i class="fa-solid fa-users"></i> Relatórios Individuais</h2>
         <p>Clique em um coordenador para ver seu relatório detalhado.</p>
-        <ul style="list-style: none; padding: 0;">
-            <li th:each="coordenador : ${listaCoordenadores}" style="margin: 10px 0;">
+        <ul style="list-style: none; padding: 0; margin-top: 20px;">
+            <li th:each="coordenador : ${listaCoordenadores}" style="margin: 10px 0; background-color: rgba(0,0,0,0.2); border-radius: 8px; transition: background-color 0.2s;">
                 <a th:href="@{/admin/relatorio/{username}(username=${coordenador.username})}"
                    th:text="${coordenador.username}"
-                   style="color: #a7b5ff; text-decoration: none; font-weight: bold;">
+                   style="color: #a7b5ff; text-decoration: none; font-weight: bold; display: block; padding: 15px;">
                 </a>
             </li>
         </ul>
