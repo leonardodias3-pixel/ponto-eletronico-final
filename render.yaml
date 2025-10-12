@@ -2,9 +2,8 @@ services:
   # Define o nosso Web Service (o site)
   - type: web
     name: ponto-eletronico
-    # CORREÇÃO 1: O ambiente correto é 'native'
-    env: native
     plan: free
+    # A linha 'env:' foi REMOVIDA. Isso está correto.
     buildCommand: "chmod +x mvnw && ./mvnw clean install"
     startCommand: "java -jar target/ponto-eletronico-0.0.1-SNAPSHOT.jar"
     envVars:
@@ -13,7 +12,6 @@ services:
       - key: SPRING_DATASOURCE_URL
         fromDatabase:
           name: ponto-db-leo # <-- Verifique se este é o nome do seu banco
-          # CORREÇÃO 2: A propriedade correta é 'connectionString'
           property: connectionString
       - key: SPRING_DATASOURCE_USERNAME
         fromDatabase:
@@ -24,7 +22,7 @@ services:
           name: ponto-db-leo # <-- Verifique se este é o nome do seu banco
           property: password
 
-# A seção de banco de dados (opcional, mas correta)
+# A seção de banco de dados
 databases:
   - name: ponto-db-leo # <-- Verifique se este é o nome do seu banco
     plan: free
