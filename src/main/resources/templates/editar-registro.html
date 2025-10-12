@@ -19,7 +19,7 @@
         <div class="form-group">
             <label for="entrada">Entrada:</label>
             <input type="datetime-local" id="entrada" name="entrada"
-                   th:value="${#temporals.format(registro.dataHoraEntrada, 'yyyy-MM-dd\'T\'HH:mm')}" required />
+                   th:value="${entradaFormatada}" required />
         </div>
 
         <div class="form-group">
