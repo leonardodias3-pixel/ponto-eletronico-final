@@ -3,7 +3,7 @@ services:
   - type: web
     name: ponto-eletronico
     plan: free
-    # A linha 'env:' foi REMOVIDA. Isso está correto.
+    # A linha 'env:' foi removida. O 'JAVA_VERSION' abaixo é o que define o ambiente.
     buildCommand: "chmod +x mvnw && ./mvnw clean install"
     startCommand: "java -jar target/ponto-eletronico-0.0.1-SNAPSHOT.jar"
     envVars:
