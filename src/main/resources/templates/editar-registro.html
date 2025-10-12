@@ -23,7 +23,7 @@
         <div class="form-group">
             <label for="saida">Saída:</label>
             <input type="datetime-local" id="saida" name="saida"
-                   th:value="${registro.dataHoraSaida != null ? #temporals.format(registro.dataHoraSaida, 'yyyy-MM-dd\'T\'HH:mm') : ''}"
+                   th:value="${saidaFormatada}"
                    required />
         </div>
         <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Salvar Alterações</button>

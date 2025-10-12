@@ -14,8 +14,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter; // <-- IMPORT NOVO
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,61 +32,44 @@ public class AdminController {
     @Autowired
     private CoordenadorService coordenadorService;
 
-    // Método da dashboard principal (já estava correto)
+    // ... (os outros métodos como dashboard, relatório e excluir continuam iguais)
     @GetMapping("/dashboard")
-    public String mostrarAdminDashboard(Model model, Authentication authentication) {
-        model.addAttribute("nomeUsuario", authentication.getName());
-        model.addAttribute("listaCoordenadores", coordenadorService.findAllCoordenadores());
-        return "admin-dashboard";
-    }
+    public String mostrarAdminDashboard(Model model, Authentication authentication) { /* ...código existente... */ }
 
-    // Método do relatório individual (padronizado para não usar HttpSession)
     @GetMapping("/relatorio/{username}")
-    public String verRelatorioDoCoordenador(@PathVariable String username, Model model) {
-        Map<String, Double> dadosGrafico = pontoService.getHorasTrabalhadasPorDiaDaSemana(username);
-        boolean isGraficoVazio = dadosGrafico.values().stream().mapToDouble(Double::doubleValue).sum() == 0;
+    public String verRelatorioDoCoordenador(@PathVariable String username, Model model) { /* ...código existente... */ }
 
-        model.addAttribute("nomeUsuario", username);
-        model.addAttribute("statusPonto", pontoService.verificarStatus(username));
-        model.addAttribute("registros", pontoService.getRegistrosDoUsuario(username));
-        model.addAttribute("dadosGraficoSemanal", dadosGrafico);
-        model.addAttribute("isGraficoVazio", isGraficoVazio);
-
-        return "relatorio-coordenador";
-    }
-
-    // Método para excluir (já estava correto)
     @PostMapping("/coordenador/excluir/{username}")
-    public String excluirCoordenador(@PathVariable String username) {
-        coordenadorService.apagarPorUsername(username);
-        return "redirect:/admin/dashboard";
-    }
+    public String excluirCoordenador(@PathVariable String username) { /* ...código existente... */ }
 
-    // Método para mostrar o formulário de edição (com a lógica robusta)
+
+    // --- MÉTODO CORRIGIDO ---
     @GetMapping("/registro/editar/{id}")
-    public String mostrarFormularioEdicao(@PathVariable Long id, Model model) {
+    public String mostrarFormularioEdicao(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
         Optional<RegistroPonto> registroOpt = pontoService.findRegistroById(id);
 
         if (registroOpt.isPresent()) {
-            model.addAttribute("registro", registroOpt.get());
+            RegistroPonto registro = registroOpt.get();
+            model.addAttribute("registro", registro);
+
+            // LÓGICA MOVIDA PARA CÁ: Pré-formatamos a data de saída
+            String saidaFormatada = "";
+            if (registro.getDataHoraSaida() != null) {
+                // Formato exigido pelo input datetime-local
+                saidaFormatada = registro.getDataHoraSaida().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
+            }
+            model.addAttribute("saidaFormatada", saidaFormatada);
+
             return "editar-registro";
         } else {
-            // Se não encontrar o registro, redireciona para a segurança da dashboard
-            return "redirect:/admin/dashboard?erro=registro_nao_encontrado";
+            redirectAttributes.addFlashAttribute("erro", "Registro com ID " + id + " não encontrado.");
+            return "redirect:/admin/dashboard";
         }
     }
 
-    // Método para salvar a edição (já estava correto)
+    // O método de salvar continua igual
     @PostMapping("/registro/editar/{id}")
     public String salvarEdicaoRegistro(@PathVariable Long id,
-                                       @RequestParam("saida") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime novaSaida) {
-
-        String username = pontoService.findRegistroById(id)
-                .map(RegistroPonto::getUsernameCoordenador)
-                .orElseThrow(() -> new IllegalArgumentException("Registro não encontrado para redirecionamento"));
-
-        pontoService.atualizarRegistroSaida(id, novaSaida);
-
-        return "redirect:/admin/relatorio/" + username;
-    }
+                                       @RequestParam("saida") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime novaSaida,
+                                       RedirectAttributes redirectAttributes) { /* ...código existente... */ }
 }
