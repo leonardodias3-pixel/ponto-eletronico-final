@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.List;
 import java.util.Map;
+import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
 @RequestMapping("/admin")
@@ -53,5 +54,10 @@ public class AdminController {
         model.addAttribute("isGraficoVazio", isGraficoVazio);
 
         return "relatorio-coordenador"; // Retorna a nova página de relatório
+    }
+    @PostMapping("/coordenador/excluir/{username}")
+    public String excluirCoordenador(@PathVariable String username) {
+        coordenadorService.apagarPorUsername(username);
+        return "redirect:/admin/dashboard"; // Volta para a dashboard do admin
     }
 }

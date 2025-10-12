@@ -4,10 +4,11 @@ import com.recrieponto.ponto_eletronico.model.RegistroPonto;
 import com.recrieponto.ponto_eletronico.repository.RegistroPontoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // <-- Importante
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId; // <-- Import adicionado
+import java.time.ZoneId;
 import java.time.format.TextStyle;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -29,7 +30,6 @@ public class PontoService {
             registroPontoRepository.save(novoRegistro);
         } else {
             RegistroPonto registroAberto = ultimoRegistroOpt.get();
-            // MUDANÇA CRÍTICA: Captura a hora de saída especificamente do fuso de São Paulo
             registroAberto.setDataHoraSaida(LocalDateTime.now(ZoneId.of("America/Sao_Paulo")));
             registroPontoRepository.save(registroAberto);
         }
@@ -53,6 +53,10 @@ public class PontoService {
         return registroPontoRepository.findAllByUsernameCoordenadorOrderByDataHoraEntradaDesc(username);
     }
 
+    public List<RegistroPonto> getTodosOsRegistros() {
+        return registroPontoRepository.findAllByOrderByDataHoraEntradaDesc();
+    }
+
     public Map<String, Double> getHorasTrabalhadasPorDiaDaSemana(String username) {
         Map<String, Double> dadosGrafico = new LinkedHashMap<>();
         LocalDate hoje = LocalDate.now();
@@ -72,5 +76,11 @@ public class PontoService {
             dadosGrafico.put(nomeDia.toUpperCase(), horasNoDia);
         }
         return dadosGrafico;
+    }
+
+    // --- NOVO MÉTODO ADICIONADO AQUI ---
+    @Transactional
+    public void apagarRegistrosDeUmUsuario(String username) {
+        registroPontoRepository.deleteAllByUsernameCoordenador(username);
     }
 }
