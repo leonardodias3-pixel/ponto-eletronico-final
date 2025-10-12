@@ -6,6 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId; // <-- Import adicionado
 
 @Entity
 public class RegistroPonto {
@@ -18,18 +19,19 @@ public class RegistroPonto {
     private LocalDateTime dataHoraEntrada;
     private LocalDateTime dataHoraSaida;
 
-    // Construtor vazio OBRIGATÓRIO para o JPA
+    // Construtor vazio obrigatório para o JPA
     public RegistroPonto() {
     }
 
     // Nosso construtor que usamos na lógica
     public RegistroPonto(String usernameCoordenador) {
         this.usernameCoordenador = usernameCoordenador;
-        this.dataHoraEntrada = LocalDateTime.now();
+        // MUDANÇA CRÍTICA: Captura a hora especificamente do fuso de São Paulo
+        this.dataHoraEntrada = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
         this.dataHoraSaida = null;
     }
 
-    // Getters e Setters
+    // Getters e Setters (completos)
     public Long getId() {
         return id;
     }
@@ -62,7 +64,7 @@ public class RegistroPonto {
         this.dataHoraSaida = dataHoraSaida;
     }
 
-    // Métodos auxiliares que já criamos
+    // Métodos auxiliares (completos)
     public String getHorasTrabalhadas() {
         if (dataHoraEntrada != null && dataHoraSaida != null) {
             Duration duracao = Duration.between(dataHoraEntrada, dataHoraSaida);

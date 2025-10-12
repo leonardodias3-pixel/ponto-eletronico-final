@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId; // <-- Import adicionado
 import java.time.format.TextStyle;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -28,7 +29,8 @@ public class PontoService {
             registroPontoRepository.save(novoRegistro);
         } else {
             RegistroPonto registroAberto = ultimoRegistroOpt.get();
-            registroAberto.setDataHoraSaida(LocalDateTime.now());
+            // MUDANÇA CRÍTICA: Captura a hora de saída especificamente do fuso de São Paulo
+            registroAberto.setDataHoraSaida(LocalDateTime.now(ZoneId.of("America/Sao_Paulo")));
             registroPontoRepository.save(registroAberto);
         }
     }
@@ -60,7 +62,6 @@ public class PontoService {
 
         for (int i = 6; i >= 0; i--) {
             LocalDate dia = hoje.minusDays(i);
-            // Usando a versão compatível com Java 17
             String nomeDia = dia.getDayOfWeek().getDisplayName(TextStyle.SHORT, new Locale("pt", "BR"));
 
             double horasNoDia = registrosDaSemana.stream()
@@ -71,8 +72,5 @@ public class PontoService {
             dadosGrafico.put(nomeDia.toUpperCase(), horasNoDia);
         }
         return dadosGrafico;
-    }
-    public List<RegistroPonto> getTodosOsRegistros() {
-        return registroPontoRepository.findAllByOrderByDataHoraEntradaDesc();
     }
 }
