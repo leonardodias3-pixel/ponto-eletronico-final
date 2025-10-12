@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional; // <-- Import adicionado
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/admin")
@@ -30,17 +30,15 @@ public class AdminController {
     @Autowired
     private CoordenadorService coordenadorService;
 
+    // Método da dashboard principal (já estava correto)
     @GetMapping("/dashboard")
     public String mostrarAdminDashboard(Model model, Authentication authentication) {
-        String username = authentication.getName();
-        List<Coordenador> listaCoordenadores = coordenadorService.findAllCoordenadores();
-
-        model.addAttribute("nomeUsuario", username);
-        model.addAttribute("listaCoordenadores", listaCoordenadores);
-
+        model.addAttribute("nomeUsuario", authentication.getName());
+        model.addAttribute("listaCoordenadores", coordenadorService.findAllCoordenadores());
         return "admin-dashboard";
     }
 
+    // Método do relatório individual (padronizado para não usar HttpSession)
     @GetMapping("/relatorio/{username}")
     public String verRelatorioDoCoordenador(@PathVariable String username, Model model) {
         Map<String, Double> dadosGrafico = pontoService.getHorasTrabalhadasPorDiaDaSemana(username);
@@ -55,36 +53,35 @@ public class AdminController {
         return "relatorio-coordenador";
     }
 
+    // Método para excluir (já estava correto)
     @PostMapping("/coordenador/excluir/{username}")
     public String excluirCoordenador(@PathVariable String username) {
         coordenadorService.apagarPorUsername(username);
         return "redirect:/admin/dashboard";
     }
 
-    // --- MÉTODO CORRIGIDO ---
+    // Método para mostrar o formulário de edição (com a lógica robusta)
     @GetMapping("/registro/editar/{id}")
     public String mostrarFormularioEdicao(@PathVariable Long id, Model model) {
-        // Primeiro, buscamos o registro e guardamos em um Optional
         Optional<RegistroPonto> registroOpt = pontoService.findRegistroById(id);
 
-        // Verificamos se o Optional contém um valor
         if (registroOpt.isPresent()) {
-            // Se sim, adicionamos ao model e mostramos a página de edição
             model.addAttribute("registro", registroOpt.get());
             return "editar-registro";
         } else {
-            // Se não, o ID era inválido. Redirecionamos de volta para a segurança da dashboard.
-            return "redirect:/admin/dashboard";
+            // Se não encontrar o registro, redireciona para a segurança da dashboard
+            return "redirect:/admin/dashboard?erro=registro_nao_encontrado";
         }
     }
 
+    // Método para salvar a edição (já estava correto)
     @PostMapping("/registro/editar/{id}")
     public String salvarEdicaoRegistro(@PathVariable Long id,
                                        @RequestParam("saida") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime novaSaida) {
 
         String username = pontoService.findRegistroById(id)
                 .map(RegistroPonto::getUsernameCoordenador)
-                .orElseThrow(() -> new IllegalArgumentException("Registro não encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException("Registro não encontrado para redirecionamento"));
 
         pontoService.atualizarRegistroSaida(id, novaSaida);
 
