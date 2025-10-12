@@ -1,8 +1,9 @@
-# A primeira seção define os "serviços" que rodam código.
 services:
+  # Define o nosso Web Service (o site)
   - type: web
     name: ponto-eletronico
-    env: java
+    # CORREÇÃO 1: O ambiente correto é 'native'
+    env: native
     plan: free
     buildCommand: "chmod +x mvnw && ./mvnw clean install"
     startCommand: "java -jar target/ponto-eletronico-0.0.1-SNAPSHOT.jar"
@@ -12,7 +13,8 @@ services:
       - key: SPRING_DATASOURCE_URL
         fromDatabase:
           name: ponto-db-leo # <-- Verifique se este é o nome do seu banco
-          property: internalConnectionString
+          # CORREÇÃO 2: A propriedade correta é 'connectionString'
+          property: connectionString
       - key: SPRING_DATASOURCE_USERNAME
         fromDatabase:
           name: ponto-db-leo # <-- Verifique se este é o nome do seu banco
@@ -22,7 +24,7 @@ services:
           name: ponto-db-leo # <-- Verifique se este é o nome do seu banco
           property: password
 
-# A segunda seção, separada, define os bancos de dados.
+# A seção de banco de dados (opcional, mas correta)
 databases:
   - name: ponto-db-leo # <-- Verifique se este é o nome do seu banco
     plan: free
