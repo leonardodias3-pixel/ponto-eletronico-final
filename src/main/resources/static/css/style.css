@@ -91,9 +91,10 @@ input:-webkit-autofill:active {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
+    padding: 15px 25px; /* Aumentado */
     background: rgba(0, 0, 0, 0.4);
     border-radius: 12px;
+    font-size: 1.1rem; /* Aumentado */
 }
 
 .card {
@@ -101,6 +102,8 @@ input:-webkit-autofill:active {
     padding: 25px;
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    /* Adicionada transição para efeito hover */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card h2 {
@@ -173,6 +176,51 @@ thead th {
 
 .btn-success {
     background: linear-gradient(45deg, #28a745, #218838);
+}
+
+/* ======================== */
+/* REFINAMENTOS VISUAIS     */
+/* ======================== */
+.logo {
+    font-weight: bold;
+    font-size: 1.3rem;
+}
+
+.logo i {
+    margin-right: 10px;
+}
+
+.user-info a {
+    color: #ff8a8a;
+    text-decoration: none;
+    margin-left: 20px;
+    transition: color 0.2s;
+}
+
+.user-info a:hover {
+    color: #ffc2c2;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.4);
+}
+
+.card h2 i {
+    margin-right: 12px;
+    color: #a7b5ff;
+}
+
+tbody tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+tbody tr {
+    transition: background-color 0.2s;
+}
+
+tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 /* ======================== */
