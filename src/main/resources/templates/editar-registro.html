@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Registro de Ponto</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+</head>
+<body>
+<div class="login-card">
+    <h1><i class="fa-solid fa-edit"></i> Editar Ponto</h1>
+    <p th:text="'Coordenador: ' + ${registro.usernameCoordenador}" style="margin-bottom: 20px;"></p>
+
+    <form th:action="@{/admin/registro/editar/{id}(id=${registro.id})}" method="post">
+        <div class="form-group">
+            <label for="entrada">Entrada:</label>
+            <input type="text" id="entrada"
+                   th:value="${#temporals.format(registro.dataHoraEntrada, 'dd/MM/yyyy HH:mm')}" disabled />
+        </div>
+        <div class="form-group">
+            <label for="saida">Saída:</label>
+            <input type="datetime-local" id="saida" name="saida"
+                   th:value="${registro.dataHoraSaida != null ? #temporals.format(registro.dataHoraSaida, 'yyyy-MM-dd\'T\'HH:mm') : ''}"
+                   required />
+        </div>
+        <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Salvar Alterações</button>
+        <a th:href="@{/admin/relatorio/{username}(username=${registro.usernameCoordenador})}"
+           class="btn" style="margin-top: 10px; background: #6c757d; text-decoration: none; display: block;">Cancelar</a>
+    </form>
+</div>
+</body>
+</html>

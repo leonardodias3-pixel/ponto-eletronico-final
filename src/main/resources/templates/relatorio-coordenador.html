@@ -32,12 +32,16 @@
         <canvas id="graficoSemanal" width="400" height="200"></canvas>
         <p th:if="${isGraficoVazio}" class="placeholder-text">Nenhum dado de horas encontrado para esta semana.</p>
     </div>
+
     <div class="card card-tabela">
         <h2><i class="fa-solid fa-calendar-days"></i> Relatório Mensal</h2>
         <div class="table-wrapper">
             <table>
                 <thead>
-                <tr><th>Data</th><th>Entrada</th><th>Saída</th><th>Total de Horas</th></tr>
+                <tr>
+                    <th>Data</th><th>Entrada</th><th>Saída</th><th>Total</th>
+                    <th style="width: 100px;">Ações</th>
+                </tr>
                 </thead>
                 <tbody>
                 <tr th:each="registro : ${registros}">
@@ -45,15 +49,21 @@
                     <td th:text="${#temporals.format(registro.dataHoraEntrada, 'HH:mm')}"></td>
                     <td th:text="${registro.dataHoraSaida != null ? #temporals.format(registro.dataHoraSaida, 'HH:mm') : '--'}"></td>
                     <td th:text="${registro.getHorasTrabalhadas()}"></td>
+                    <td>
+                        <a th:href="@{/admin/registro/editar/{id}(id=${registro.id})}" class="btn-action btn-warning">
+                            <i class="fa-solid fa-pencil"></i>
+                        </a>
+                    </td>
                 </tr>
                 <tr th:if="${registros.isEmpty()}">
-                    <td colspan="4" class="placeholder-text">Nenhum registro encontrado.</td>
+                    <td colspan="5" class="placeholder-text">Nenhum registro encontrado.</td>
                 </tr>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
+
 <script th:inline="javascript">
     /*<![CDATA[*/
     const weeklyData = /*[[${dadosGraficoSemanal}]]*/ {};
@@ -71,5 +81,8 @@
     });
     /*]]>*/
 </script>
+<style>
+    .btn-action.btn-warning { background-color: #ffc107; color: #333; }
+</style>
 </body>
 </html>

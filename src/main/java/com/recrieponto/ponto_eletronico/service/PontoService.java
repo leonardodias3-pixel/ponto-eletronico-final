@@ -4,7 +4,7 @@ import com.recrieponto.ponto_eletronico.model.RegistroPonto;
 import com.recrieponto.ponto_eletronico.repository.RegistroPontoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional; // <-- Importante
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -78,9 +78,23 @@ public class PontoService {
         return dadosGrafico;
     }
 
-    // --- NOVO MÉTODO ADICIONADO AQUI ---
     @Transactional
     public void apagarRegistrosDeUmUsuario(String username) {
         registroPontoRepository.deleteAllByUsernameCoordenador(username);
+    }
+
+    // --- NOVOS MÉTODOS ADICIONADOS ---
+    public Optional<RegistroPonto> findRegistroById(Long id) {
+        return registroPontoRepository.findById(id);
+    }
+
+    @Transactional
+    public void atualizarRegistroSaida(Long id, LocalDateTime novaDataHoraSaida) {
+        RegistroPonto registro = registroPontoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Registro de Ponto inválido com ID: " + id));
+
+        registro.setDataHoraSaida(novaDataHoraSaida);
+
+        registroPontoRepository.save(registro);
     }
 }
