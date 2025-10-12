@@ -1,5 +1,5 @@
+# A primeira seção define os "serviços" que rodam código.
 services:
-  # Define o nosso Web Service (o site)
   - type: web
     name: ponto-eletronico
     env: java
@@ -22,7 +22,7 @@ services:
           name: ponto-db-leo # <-- Verifique se este é o nome do seu banco
           property: password
 
-  # Define o nosso Banco de Dados
-  - type: database   # <-- A INSTRUÇÃO CORRIGIDA! (Era 'psql')
-    name: ponto-db-leo # <-- Verifique se este é o nome do seu banco
+# A segunda seção, separada, define os bancos de dados.
+databases:
+  - name: ponto-db-leo # <-- Verifique se este é o nome do seu banco
     plan: free
