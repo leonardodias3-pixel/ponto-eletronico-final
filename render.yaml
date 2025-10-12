@@ -1,28 +1,9 @@
 services:
-  # Define o nosso Web Service (o site)
   - type: web
-    name: ponto-eletronico
+    name: ponto-final # Um nome novo para o serviço
     plan: free
-    # A linha 'env:' foi removida. O 'JAVA_VERSION' abaixo é o que define o ambiente.
-    buildCommand: "chmod +x mvnw && ./mvnw clean install"
+    buildCommand: "chmod +x mvnw && ./mvnw clean install -DskipTests"
     startCommand: "java -jar target/ponto-eletronico-0.0.1-SNAPSHOT.jar"
     envVars:
       - key: JAVA_VERSION
         value: 17
-      - key: SPRING_DATASOURCE_URL
-        fromDatabase:
-          name: ponto-db-leo # <-- Verifique se este é o nome do seu banco
-          property: connectionString
-      - key: SPRING_DATASOURCE_USERNAME
-        fromDatabase:
-          name: ponto-db-leo # <-- Verifique se este é o nome do seu banco
-          property: user
-      - key: SPRING_DATASOURCE_PASSWORD
-        fromDatabase:
-          name: ponto-db-leo # <-- Verifique se este é o nome do seu banco
-          property: password
-
-# A seção de banco de dados
-databases:
-  - name: ponto-db-leo # <-- Verifique se este é o nome do seu banco
-    plan: free
