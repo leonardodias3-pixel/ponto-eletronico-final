@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="dashboard-container">
+    <header class="dashboard-header">
+        <h1>Admin Dashboard</h1>
+        <div class="user-info">
+            <span>Olá, <b th:text="${nomeUsuario}">Admin</b>!</span>
+            <a href="/logout" style="color: #ff8a8a; text-decoration: none;">Sair</a>
+        </div>
+    </header>
+
+    <div class="card" style="grid-column: 1 / -1;">
+        <h2>Relatórios Individuais</h2>
+        <p>Clique em um coordenador para ver seu relatório detalhado.</p>
+        <ul style="list-style: none; padding: 0;">
+            <li th:each="coordenador : ${listaCoordenadores}" style="margin: 10px 0;">
+                <a th:href="@{/admin/relatorio/{username}(username=${coordenador.username})}"
+                   th:text="${coordenador.username}"
+                   style="color: #a7b5ff; text-decoration: none; font-weight: bold;">
+                </a>
+            </li>
+        </ul>
+        <div th:if="${listaCoordenadores.isEmpty()}">
+            <p class="placeholder-text">Nenhum coordenador cadastrado ainda.</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

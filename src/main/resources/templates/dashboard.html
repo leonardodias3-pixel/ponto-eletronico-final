@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Controle de Ponto</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="dashboard-container">
+    <header class="dashboard-header">
+        <h1>Dashboard</h1>
+        <div class="user-info">
+            <span>Olá, <b th:text="${nomeUsuario}">Usuário</b>!</span>
+            <a href="/logout" style="color: #ff8a8a; text-decoration: none;">Sair</a>
+        </div>
+    </header>
+    <div class="card card-ponto">
+        <h2>Registro de Ponto</h2>
+        <p style="margin-bottom: 30px; font-size: 1.1rem; font-weight: bold;" th:text="${statusPonto}">Status...</p>
+        <form th:action="@{/ponto/registrar}" method="post">
+            <button type="submit" class="btn btn-success">Bater Ponto</button>
+        </form>
+    </div>
+    <div class="card card-grafico">
+        <h2>Relatório Semanal</h2>
+        <canvas id="graficoSemanal" width="400" height="200"></canvas>
+        <p th:if="${isGraficoVazio}" class="placeholder-text">Nenhum dado de horas encontrado para esta semana.</p>
+    </div>
+    <div class="card card-tabela">
+        <h2>Relatório Mensal</h2>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr><th>Data</th><th>Entrada</th><th>Saída</th><th>Total de Horas</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="registro : ${registros}">
+                    <td th:text="${#temporals.format(registro.dataHoraEntrada, 'dd/MM/yyyy')}"></td>
+                    <td th:text="${#temporals.format(registro.dataHoraEntrada, 'HH:mm')}"></td>
+                    <td th:text="${registro.dataHoraSaida != null ? #temporals.format(registro.dataHoraSaida, 'HH:mm') : '--'}"></td>
+                    <td th:text="${registro.getHorasTrabalhadas()}"></td>
+                </tr>
+                <tr th:if="${registros.isEmpty()}">
+                    <td colspan="4" class="placeholder-text">Nenhum registro encontrado.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const weeklyData = /*[[${dadosGraficoSemanal}]]*/ {};
+    const labels = Object.keys(weeklyData);
+    const dataValues = Object.values(weeklyData);
+    const ctx = document.getElementById('graficoSemanal').getContext('2d');
+    const myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Horas Trabalhadas', data: dataValues,
+                backgroundColor: 'rgba(118, 75, 162, 0.6)',
+                borderColor: 'rgba(118, 75, 162, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: { beginAtZero: true, ticks: { color: '#ccc' } },
+                x: { ticks: { color: '#ccc' } }
+            },
+            plugins: { legend: { labels: { color: '#ccc' } } }
+        }
+    });
+    /*]]>*/
+</script>
+</body>
+</html>
