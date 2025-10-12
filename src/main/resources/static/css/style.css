@@ -241,3 +241,43 @@ tbody tr:hover {
             "tabela";
     }
 }
+/* ======================== */
+/* ESTILOS DOS BOTÕES DE AÇÃO (ADMIN) */
+/* ======================== */
+
+/* Classe base para os botões pequenos de ação */
+.btn-action {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-family: 'Poppins', sans-serif;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px; /* Espaço entre o ícone e o texto */
+    transition: opacity 0.2s ease;
+}
+
+.btn-action:hover {
+    opacity: 0.8;
+}
+
+/* Cor vermelha para perigo (Excluir) */
+.btn-danger {
+    background-color: #dc3545;
+}
+
+/* Cor azul para informação (Ver Relatório) */
+.btn-info {
+    background-color: #0d6efd;
+}
+
+/* Alinha os botões na célula da tabela */
+.actions-cell {
+    display: flex;
+    gap: 10px; /* Espaço entre os botões */
+    align-items: center;
+}

@@ -1,9 +1,27 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 </head>
 <body>
 <div class="dashboard-container">
+
+    <header class="dashboard-header">
+        <div class="logo">
+            <i class="fa-solid fa-user-shield"></i> Painel do Admin
+        </div>
+        <div class="user-info">
+            <span>Olá, <b th:text="${nomeUsuario}">Admin</b>!</span>
+            <a href="/logout"><i class="fa-solid fa-right-from-bracket"></i> Sair</a>
+        </div>
+    </header>
+
     <div class="card" style="grid-column: 1 / -1;">
         <h2><i class="fa-solid fa-users"></i> Gerenciar Coordenadores</h2>
         <div class="table-wrapper">
@@ -11,23 +29,23 @@
                 <thead>
                 <tr>
                     <th>Nome de Usuário</th>
-                    <th>Ações</th>
-                </tr>
+                    <th style="width: 250px;">Ações</th> </tr>
                 </thead>
                 <tbody>
                 <tr th:each="coordenador : ${listaCoordenadores}">
-                    <td th:text="${coordenador.username}"></td>
-                    <td>
+                    <td th:text="${coordenador.username}" style="font-weight: bold;"></td>
+
+                    <td class="actions-cell">
+                        <a th:href="@{/admin/relatorio/{username}(username=${coordenador.username})}" class="btn-action btn-info">
+                            <i class="fa-solid fa-chart-line"></i> Ver Relatório
+                        </a>
                         <form th:action="@{/admin/coordenador/excluir/{username}(username=${coordenador.username})}"
                               method="post" style="display: inline;">
-                            <button type="submit" class="btn-delete"
+                            <button type="submit" class="btn-action btn-danger"
                                     onclick="return confirm('Tem certeza que deseja excluir este coordenador e todos os seus registros de ponto? Esta ação não pode ser desfeita.');">
                                 <i class="fa-solid fa-trash-can"></i> Excluir
                             </button>
                         </form>
-                        <a th:href="@{/admin/relatorio/{username}(username=${coordenador.username})}" class="btn-view">
-                            <i class="fa-solid fa-chart-line"></i> Ver Relatório
-                        </a>
                     </td>
                 </tr>
                 <tr th:if="${listaCoordenadores.isEmpty()}">
@@ -38,19 +56,5 @@
         </div>
     </div>
 </div>
-
-<style>
-    .btn-delete, .btn-view {
-        padding: 8px 15px;
-        border: none;
-        border-radius: 5px;
-        color: white;
-        cursor: pointer;
-        text-decoration: none;
-        font-size: 0.9rem;
-    }
-    .btn-delete { background-color: #dc3545; }
-    .btn-view { background-color: #007bff; }
-</style>
 </body>
 </html>
