@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional; // <-- Import adicionado
 
 @Controller
 @RequestMapping("/admin")
@@ -60,13 +61,21 @@ public class AdminController {
         return "redirect:/admin/dashboard";
     }
 
-    // --- NOVOS MÉTODOS ADICIONADOS ---
+    // --- MÉTODO CORRIGIDO ---
     @GetMapping("/registro/editar/{id}")
     public String mostrarFormularioEdicao(@PathVariable Long id, Model model) {
-        pontoService.findRegistroById(id).ifPresent(registro -> {
-            model.addAttribute("registro", registro);
-        });
-        return "editar-registro";
+        // Primeiro, buscamos o registro e guardamos em um Optional
+        Optional<RegistroPonto> registroOpt = pontoService.findRegistroById(id);
+
+        // Verificamos se o Optional contém um valor
+        if (registroOpt.isPresent()) {
+            // Se sim, adicionamos ao model e mostramos a página de edição
+            model.addAttribute("registro", registroOpt.get());
+            return "editar-registro";
+        } else {
+            // Se não, o ID era inválido. Redirecionamos de volta para a segurança da dashboard.
+            return "redirect:/admin/dashboard";
+        }
     }
 
     @PostMapping("/registro/editar/{id}")
