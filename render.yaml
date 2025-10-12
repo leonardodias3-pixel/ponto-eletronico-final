@@ -2,33 +2,27 @@ services:
   # Define o nosso Web Service (o site)
   - type: web
     name: ponto-eletronico
-    # A INSTRUÇÃO MAIS IMPORTANTE: Força o ambiente a ser Java
     env: java
     plan: free
-    # Os comandos que já conhecemos
     buildCommand: "chmod +x mvnw && ./mvnw clean install"
     startCommand: "java -jar target/ponto-eletronico-0.0.1-SNAPSHOT.jar"
     envVars:
-      # A variável de versão do Java
       - key: JAVA_VERSION
         value: 17
-      # As variáveis do banco de dados, que agora vão se conectar automaticamente
       - key: SPRING_DATASOURCE_URL
         fromDatabase:
-          name: ponto-db-leo # <-- MUDE AQUI para o nome do seu banco na Render
+          name: ponto-db-leo # <-- Verifique se este é o nome do seu banco
           property: internalConnectionString
       - key: SPRING_DATASOURCE_USERNAME
         fromDatabase:
-          name: ponto-db-leo # <-- MUDE AQUI para o nome do seu banco na Render
+          name: ponto-db-leo # <-- Verifique se este é o nome do seu banco
           property: user
       - key: SPRING_DATASOURCE_PASSWORD
         fromDatabase:
-          name: ponto-db-leo # <-- MUDE AQUI para o nome do seu banco na Render
+          name: ponto-db-leo # <-- Verifique se este é o nome do seu banco
           property: password
 
   # Define o nosso Banco de Dados
-  # Se você já criou o banco, a Render vai apenas se conectar a ele.
-  # Se não, ela criaria um novo com este nome.
-  - type: psql
-    name: ponto-db-leo # <-- MUDE AQUI para o nome do seu banco na Render
+  - type: database   # <-- A INSTRUÇÃO CORRIGIDA! (Era 'psql')
+    name: ponto-db-leo # <-- Verifique se este é o nome do seu banco
     plan: free
