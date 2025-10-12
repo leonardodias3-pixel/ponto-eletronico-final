@@ -59,6 +59,7 @@ public class AdminController {
         return "redirect:/admin/dashboard";
     }
 
+    // --- MÉTODO CORRIGIDO ---
     @GetMapping("/registro/editar/{id}")
     public String mostrarFormularioEdicao(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
         Optional<RegistroPonto> registroOpt = pontoService.findRegistroById(id);
@@ -66,6 +67,13 @@ public class AdminController {
         if (registroOpt.isPresent()) {
             RegistroPonto registro = registroOpt.get();
             model.addAttribute("registro", registro);
+
+            // --- MUDANÇA AQUI: Pré-formatamos as DUAS datas ---
+            String entradaFormatada = "";
+            if (registro.getDataHoraEntrada() != null) {
+                entradaFormatada = registro.getDataHoraEntrada().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
+            }
+            model.addAttribute("entradaFormatada", entradaFormatada);
 
             String saidaFormatada = "";
             if (registro.getDataHoraSaida() != null) {
@@ -80,7 +88,6 @@ public class AdminController {
         }
     }
 
-    // --- MÉTODO MODIFICADO ---
     @PostMapping("/registro/editar/{id}")
     public String salvarEdicaoRegistro(@PathVariable Long id,
                                        @RequestParam("entrada") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime novaEntrada,
@@ -94,9 +101,7 @@ public class AdminController {
         }
 
         String username = registroOpt.get().getUsernameCoordenador();
-
         pontoService.atualizarRegistroCompleto(id, novaEntrada, novaSaida);
-
         redirectAttributes.addFlashAttribute("sucesso", "Registro de ponto atualizado com sucesso!");
         return "redirect:/admin/relatorio/" + username;
     }
