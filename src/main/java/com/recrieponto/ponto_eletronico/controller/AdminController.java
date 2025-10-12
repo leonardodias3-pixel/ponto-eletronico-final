@@ -80,8 +80,10 @@ public class AdminController {
         }
     }
 
+    // --- MÉTODO MODIFICADO ---
     @PostMapping("/registro/editar/{id}")
     public String salvarEdicaoRegistro(@PathVariable Long id,
+                                       @RequestParam("entrada") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime novaEntrada,
                                        @RequestParam("saida") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime novaSaida,
                                        RedirectAttributes redirectAttributes) {
 
@@ -92,7 +94,9 @@ public class AdminController {
         }
 
         String username = registroOpt.get().getUsernameCoordenador();
-        pontoService.atualizarRegistroSaida(id, novaSaida);
+
+        pontoService.atualizarRegistroCompleto(id, novaEntrada, novaSaida);
+
         redirectAttributes.addFlashAttribute("sucesso", "Registro de ponto atualizado com sucesso!");
         return "redirect:/admin/relatorio/" + username;
     }

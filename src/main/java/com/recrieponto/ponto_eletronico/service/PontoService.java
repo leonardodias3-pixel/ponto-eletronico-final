@@ -83,7 +83,6 @@ public class PontoService {
         registroPontoRepository.deleteAllByUsernameCoordenador(username);
     }
 
-    // --- NOVOS MÉTODOS ADICIONADOS ---
     public Optional<RegistroPonto> findRegistroById(Long id) {
         return registroPontoRepository.findById(id);
     }
@@ -92,8 +91,18 @@ public class PontoService {
     public void atualizarRegistroSaida(Long id, LocalDateTime novaDataHoraSaida) {
         RegistroPonto registro = registroPontoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Registro de Ponto inválido com ID: " + id));
-
         registro.setDataHoraSaida(novaDataHoraSaida);
+        registroPontoRepository.save(registro);
+    }
+
+    // --- NOVO MÉTODO ADICIONADO ---
+    @Transactional
+    public void atualizarRegistroCompleto(Long id, LocalDateTime novaEntrada, LocalDateTime novaSaida) {
+        RegistroPonto registro = registroPontoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Registro de Ponto inválido com ID: " + id));
+
+        registro.setDataHoraEntrada(novaEntrada);
+        registro.setDataHoraSaida(novaSaida);
 
         registroPontoRepository.save(registro);
     }

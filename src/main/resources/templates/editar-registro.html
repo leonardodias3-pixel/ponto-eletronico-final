@@ -15,17 +15,20 @@
     <p th:text="'Coordenador: ' + ${registro.usernameCoordenador}" style="margin-bottom: 20px;"></p>
 
     <form th:action="@{/admin/registro/editar/{id}(id=${registro.id})}" method="post">
+
         <div class="form-group">
             <label for="entrada">Entrada:</label>
-            <input type="text" id="entrada"
-                   th:value="${#temporals.format(registro.dataHoraEntrada, 'dd/MM/yyyy HH:mm')}" disabled />
+            <input type="datetime-local" id="entrada" name="entrada"
+                   th:value="${#temporals.format(registro.dataHoraEntrada, 'yyyy-MM-dd\'T\'HH:mm')}" required />
         </div>
+
         <div class="form-group">
             <label for="saida">Saída:</label>
             <input type="datetime-local" id="saida" name="saida"
                    th:value="${saidaFormatada}"
                    required />
         </div>
+
         <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Salvar Alterações</button>
         <a th:href="@{/admin/relatorio/{username}(username=${registro.usernameCoordenador})}"
            class="btn" style="margin-top: 10px; background: #6c757d; text-decoration: none; display: block;">Cancelar</a>
