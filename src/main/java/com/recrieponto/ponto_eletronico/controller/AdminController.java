@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter; // <-- IMPORT NOVO
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -32,18 +32,33 @@ public class AdminController {
     @Autowired
     private CoordenadorService coordenadorService;
 
-    // ... (os outros métodos como dashboard, relatório e excluir continuam iguais)
     @GetMapping("/dashboard")
-    public String mostrarAdminDashboard(Model model, Authentication authentication) { /* ...código existente... */ }
+    public String mostrarAdminDashboard(Model model, Authentication authentication) {
+        model.addAttribute("nomeUsuario", authentication.getName());
+        model.addAttribute("listaCoordenadores", coordenadorService.findAllCoordenadores());
+        return "admin-dashboard";
+    }
 
     @GetMapping("/relatorio/{username}")
-    public String verRelatorioDoCoordenador(@PathVariable String username, Model model) { /* ...código existente... */ }
+    public String verRelatorioDoCoordenador(@PathVariable String username, Model model) {
+        Map<String, Double> dadosGrafico = pontoService.getHorasTrabalhadasPorDiaDaSemana(username);
+        boolean isGraficoVazio = dadosGrafico.values().stream().mapToDouble(Double::doubleValue).sum() == 0;
+
+        model.addAttribute("nomeUsuario", username);
+        model.addAttribute("statusPonto", pontoService.verificarStatus(username));
+        model.addAttribute("registros", pontoService.getRegistrosDoUsuario(username));
+        model.addAttribute("dadosGraficoSemanal", dadosGrafico);
+        model.addAttribute("isGraficoVazio", isGraficoVazio);
+
+        return "relatorio-coordenador";
+    }
 
     @PostMapping("/coordenador/excluir/{username}")
-    public String excluirCoordenador(@PathVariable String username) { /* ...código existente... */ }
+    public String excluirCoordenador(@PathVariable String username) {
+        coordenadorService.apagarPorUsername(username);
+        return "redirect:/admin/dashboard";
+    }
 
-
-    // --- MÉTODO CORRIGIDO ---
     @GetMapping("/registro/editar/{id}")
     public String mostrarFormularioEdicao(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
         Optional<RegistroPonto> registroOpt = pontoService.findRegistroById(id);
@@ -52,10 +67,8 @@ public class AdminController {
             RegistroPonto registro = registroOpt.get();
             model.addAttribute("registro", registro);
 
-            // LÓGICA MOVIDA PARA CÁ: Pré-formatamos a data de saída
             String saidaFormatada = "";
             if (registro.getDataHoraSaida() != null) {
-                // Formato exigido pelo input datetime-local
                 saidaFormatada = registro.getDataHoraSaida().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
             }
             model.addAttribute("saidaFormatada", saidaFormatada);
@@ -67,9 +80,20 @@ public class AdminController {
         }
     }
 
-    // O método de salvar continua igual
     @PostMapping("/registro/editar/{id}")
     public String salvarEdicaoRegistro(@PathVariable Long id,
                                        @RequestParam("saida") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime novaSaida,
-                                       RedirectAttributes redirectAttributes) { /* ...código existente... */ }
+                                       RedirectAttributes redirectAttributes) {
+
+        Optional<RegistroPonto> registroOpt = pontoService.findRegistroById(id);
+        if (registroOpt.isEmpty()) {
+            redirectAttributes.addFlashAttribute("erro", "Tentativa de salvar registro inexistente.");
+            return "redirect:/admin/dashboard";
+        }
+
+        String username = registroOpt.get().getUsernameCoordenador();
+        pontoService.atualizarRegistroSaida(id, novaSaida);
+        redirectAttributes.addFlashAttribute("sucesso", "Registro de ponto atualizado com sucesso!");
+        return "redirect:/admin/relatorio/" + username;
+    }
 }
