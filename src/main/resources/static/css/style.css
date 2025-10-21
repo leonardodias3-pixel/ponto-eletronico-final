@@ -281,3 +281,46 @@ tbody tr:hover {
     gap: 10px; /* Espaço entre os botões */
     align-items: center;
 }
+/* ======================== */
+/* ESTILOS DAS MENSAGENS FLASH */
+/* ======================== */
+
+.flash-message {
+    padding: 15px 20px;
+    margin: 20px 0;
+    border-radius: 8px;
+    font-weight: bold;
+    text-align: center;
+    position: relative; /* Para o botão de fechar */
+    animation: fadeIn 0.5s ease-out; /* Reutiliza a animação */
+}
+
+.flash-success {
+    background-color: #d1e7dd; /* Verde claro */
+    color: #0f5132; /* Verde escuro */
+    border: 1px solid #badbcc;
+}
+
+.flash-error {
+    background-color: #f8d7da; /* Vermelho claro */
+    color: #842029; /* Vermelho escuro */
+    border: 1px solid #f5c2c7;
+}
+
+/* (Opcional) Estilo para um botão de fechar a mensagem */
+.flash-message .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: inherit; /* Usa a cor do texto da mensagem */
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.flash-message .close-btn:hover {
+    opacity: 1;
+}
