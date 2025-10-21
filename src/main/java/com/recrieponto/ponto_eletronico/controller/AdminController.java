@@ -4,6 +4,8 @@ import com.recrieponto.ponto_eletronico.model.Coordenador;
 import com.recrieponto.ponto_eletronico.model.RegistroPonto;
 import com.recrieponto.ponto_eletronico.service.CoordenadorService;
 import com.recrieponto.ponto_eletronico.service.PontoService;
+// Removido import do PdfGenerationService por enquanto
+// import com.recrieponto.ponto_eletronico.service.PdfGenerationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.Authentication;
@@ -16,8 +18,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+// Removidos imports do PDF por enquanto
+// import org.springframework.core.io.InputStreamResource;
+// import org.springframework.http.HttpHeaders;
+// import org.springframework.http.MediaType;
+// import org.springframework.http.ResponseEntity;
+// import java.io.ByteArrayInputStream;
+
 import java.time.LocalDateTime;
-import java.time.ZoneId; // Import necessário para validação
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +41,10 @@ public class AdminController {
 
     @Autowired
     private CoordenadorService coordenadorService;
+
+    // Removida injeção do PdfGenerationService por enquanto
+    // @Autowired(required = false)
+    // private PdfGenerationService pdfGenerationService;
 
     @GetMapping("/dashboard")
     public String mostrarAdminDashboard(Model model, Authentication authentication) {
@@ -85,8 +98,6 @@ public class AdminController {
             }
             model.addAttribute("saidaFormatada", saidaFormatada);
 
-            // Adiciona mensagem de erro se houver uma vinda do redirect da validação
-            // Renomeado para não conflitar com outros erros
             if (model.containsAttribute("erroValidacaoEdicao")) {
                 model.addAttribute("erro", model.getAttribute("erroValidacaoEdicao"));
             }
@@ -115,7 +126,6 @@ public class AdminController {
 
         // --- VALIDAÇÕES ---
         if (novaEntrada.isAfter(agora)) {
-            // Usando nome diferente para a mensagem de erro da validação
             redirectAttributes.addFlashAttribute("erroValidacaoEdicao", "A data/hora de entrada não pode ser no futuro.");
             redirectAttributes.addAttribute("id", id);
             return "redirect:/admin/registro/editar/{id}";
@@ -125,8 +135,9 @@ public class AdminController {
             redirectAttributes.addAttribute("id", id);
             return "redirect:/admin/registro/editar/{id}";
         }
+        // --- MENSAGEM CORRIGIDA AQUI ---
         if (novaSaida.isBefore(novaEntrada)) {
-            redirectAttributes.addFlashAttribute("erroValidacaoEdicao", "A data/hora de saída não pode ser anterior à data/hora de entrada.");
+            redirectAttributes.addFlashAttribute("erroValidacaoEdicao", "O horário de saída deve ser posterior ao horário de entrada.");
             redirectAttributes.addAttribute("id", id);
             return "redirect:/admin/registro/editar/{id}";
         }
@@ -142,5 +153,41 @@ public class AdminController {
         return "redirect:/admin/relatorio/" + username;
     }
 
-    // A parte do PDF foi REMOVIDA desta versão
+    @PostMapping("/registro/excluir/{id}")
+    public String excluirRegistro(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        String username = pontoService.findRegistroById(id)
+                .map(RegistroPonto::getUsernameCoordenador)
+                .orElse(null);
+
+        if (username == null) {
+            redirectAttributes.addFlashAttribute("erro", "Registro com ID " + id + " não encontrado para exclusão.");
+            return "redirect:/admin/dashboard";
+        }
+
+        try {
+            pontoService.apagarRegistroPorId(id);
+            redirectAttributes.addFlashAttribute("sucesso", "Registro de ponto excluído com sucesso!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("erro", "Erro ao excluir registro: " + e.getMessage());
+        }
+
+        return "redirect:/admin/relatorio/" + username;
+    }
+
+    // A parte do PDF foi REMOVIDA desta versão para evitar erros de compilação
+    /*
+    @GetMapping("/relatorio/{username}/pdf")
+    public ResponseEntity<InputStreamResource> gerarRelatorioPdf(@PathVariable String username) {
+        List<RegistroPonto> registros = pontoService.getRegistrosDoUsuario(username);
+        ByteArrayInputStream pdf = pdfGenerationService.generatePdfReport(registros, username);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Disposition", "attachment; filename=relatorio-" + username + ".pdf");
+
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(new InputStreamResource(pdf));
+    }
+    */
 }
