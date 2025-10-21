@@ -46,6 +46,7 @@ public class AdminController {
     // @Autowired(required = false)
     // private PdfGenerationService pdfGenerationService;
 
+    // Método para mostrar a dashboard do admin (COMPLETO)
     @GetMapping("/dashboard")
     public String mostrarAdminDashboard(Model model, Authentication authentication) {
         model.addAttribute("nomeUsuario", authentication.getName());
@@ -53,6 +54,7 @@ public class AdminController {
         return "admin-dashboard";
     }
 
+    // Método para mostrar o relatório individual (COMPLETO)
     @GetMapping("/relatorio/{username}")
     public String verRelatorioDoCoordenador(@PathVariable String username, Model model) {
         Map<String, Double> dadosGrafico = pontoService.getHorasTrabalhadasPorDiaDaSemana(username);
@@ -67,6 +69,7 @@ public class AdminController {
         return "relatorio-coordenador";
     }
 
+    // Método para excluir um coordenador (COMPLETO)
     @PostMapping("/coordenador/excluir/{username}")
     public String excluirCoordenador(@PathVariable String username, RedirectAttributes redirectAttributes) {
         try {
@@ -78,6 +81,7 @@ public class AdminController {
         return "redirect:/admin/dashboard";
     }
 
+    // Método para mostrar o formulário de edição (COMPLETO E CORRIGIDO)
     @GetMapping("/registro/editar/{id}")
     public String mostrarFormularioEdicao(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
         Optional<RegistroPonto> registroOpt = pontoService.findRegistroById(id);
@@ -98,9 +102,7 @@ public class AdminController {
             }
             model.addAttribute("saidaFormatada", saidaFormatada);
 
-            if (model.containsAttribute("erroValidacaoEdicao")) {
-                model.addAttribute("erro", model.getAttribute("erroValidacaoEdicao"));
-            }
+            // Cópia redundante de erro foi REMOVIDA daqui.
 
             return "editar-registro";
         } else {
@@ -109,6 +111,7 @@ public class AdminController {
         }
     }
 
+    // Método para salvar a edição com validações (COMPLETO E CORRIGIDO)
     @PostMapping("/registro/editar/{id}")
     public String salvarEdicaoRegistro(@PathVariable Long id,
                                        @RequestParam("entrada") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime novaEntrada,
@@ -135,7 +138,6 @@ public class AdminController {
             redirectAttributes.addAttribute("id", id);
             return "redirect:/admin/registro/editar/{id}";
         }
-        // --- MENSAGEM CORRIGIDA AQUI ---
         if (novaSaida.isBefore(novaEntrada)) {
             redirectAttributes.addFlashAttribute("erroValidacaoEdicao", "O horário de saída deve ser posterior ao horário de entrada.");
             redirectAttributes.addAttribute("id", id);
@@ -153,6 +155,7 @@ public class AdminController {
         return "redirect:/admin/relatorio/" + username;
     }
 
+    // Método para excluir um registro (COMPLETO)
     @PostMapping("/registro/excluir/{id}")
     public String excluirRegistro(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         String username = pontoService.findRegistroById(id)
@@ -174,20 +177,5 @@ public class AdminController {
         return "redirect:/admin/relatorio/" + username;
     }
 
-    // A parte do PDF foi REMOVIDA desta versão para evitar erros de compilação
-    /*
-    @GetMapping("/relatorio/{username}/pdf")
-    public ResponseEntity<InputStreamResource> gerarRelatorioPdf(@PathVariable String username) {
-        List<RegistroPonto> registros = pontoService.getRegistrosDoUsuario(username);
-        ByteArrayInputStream pdf = pdfGenerationService.generatePdfReport(registros, username);
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Disposition", "attachment; filename=relatorio-" + username + ".pdf");
-
-        return ResponseEntity
-                .ok()
-                .headers(headers)
-                .contentType(MediaType.APPLICATION_PDF)
-                .body(new InputStreamResource(pdf));
-    }
-    */
+    // A parte do PDF foi REMOVIDA para evitar erros
 }
