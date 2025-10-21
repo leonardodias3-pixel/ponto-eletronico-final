@@ -1,9 +1,50 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
+    <title th:text="'Relatório - ' + ${nomeUsuario}"></title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 </head>
 <body>
 <div class="dashboard-container">
+    <header class="dashboard-header">
+        <div class="logo">
+            <i class="fa-solid fa-user-clock"></i> Relatório: <b th:text="${nomeUsuario}">Usuário</b>
+        </div>
+        <div class="user-info">
+            <a th:href="@{/admin/relatorio/{username}/pdf(username=${nomeUsuario})}"
+               class="btn-action" style="background-color: #198754; text-decoration: none;" title="Gerar PDF">
+                <i class="fa-solid fa-file-pdf"></i>
+            </a>
+            <a href="/admin/dashboard" style="color: #a7b5ff; text-decoration: none;" title="Voltar"><i class="fa-solid fa-arrow-left"></i> Voltar</a>
+            <a href="/logout" title="Sair"><i class="fa-solid fa-right-from-bracket"></i> Sair</a>
+        </div>
+    </header>
+
+    <div th:if="${sucesso}" class="flash-message flash-success">
+        <span th:text="${sucesso}"></span>
+        <button type="button" class="close-btn" onclick="this.parentElement.style.display='none';">&times;</button>
+    </div>
+    <div th:if="${erro}" class="flash-message flash-error">
+        <span th:text="${erro}"></span>
+        <button type="button" class="close-btn" onclick="this.parentElement.style.display='none';">&times;</button>
+    </div>
+    <div class="card card-ponto">
+        <h2><i class="fa-solid fa-hand-pointer"></i> Status Atual</h2>
+        <p style="margin-bottom: 30px; font-size: 1.1rem; font-weight: bold;" th:text="${statusPonto}">Status...</p>
+    </div>
+
+    <div class="card card-grafico">
+        <h2><i class="fa-solid fa-chart-simple"></i> Relatório Semanal</h2>
+        <canvas id="graficoSemanal" width="400" height="200"></canvas>
+        <p th:if="${isGraficoVazio}" class="placeholder-text">Nenhum dado de horas encontrado para esta semana.</p>
+    </div>
+
     <div class="card card-tabela">
         <h2><i class="fa-solid fa-calendar-days"></i> Relatório Mensal</h2>
         <div class="table-wrapper">
@@ -11,7 +52,8 @@
                 <thead>
                 <tr>
                     <th>Data</th><th>Entrada</th><th>Saída</th><th>Total</th>
-                    <th style="width: 150px;">Ações</th> </tr>
+                    <th style="width: 150px;">Ações</th>
+                </tr>
                 </thead>
                 <tbody>
                 <tr th:each="registro : ${registros}">
@@ -40,9 +82,27 @@
         </div>
     </div>
 </div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    // ... (Script do gráfico completo) ...
+    const weeklyData = /*[[${dadosGraficoSemanal}]]*/ {};
+    const labels = Object.keys(weeklyData);
+    const dataValues = Object.values(weeklyData);
+    const ctx = document.getElementById('graficoSemanal').getContext('2d');
+    const myChart = new Chart(ctx, {
+        type: 'bar', data: { labels: labels, datasets: [{
+            label: 'Horas Trabalhadas', data: dataValues, backgroundColor: 'rgba(118, 75, 162, 0.6)',
+            borderColor: 'rgba(118, 75, 162, 1)', borderWidth: 1
+        }]},
+        options: { scales: { y: { beginAtZero: true, ticks: { color: '#ccc' } }, x: { ticks: { color: '#ccc' } } },
+            plugins: { legend: { labels: { color: '#ccc' } } }
+        }
+    });
+    /*]]>*/
+</script>
 <style>
     .btn-action.btn-warning { background-color: #ffc107; color: #333; }
-    /* Adiciona o estilo que já tínhamos para o botão vermelho */
     .btn-action.btn-danger { background-color: #dc3545; }
 </style>
 </body>

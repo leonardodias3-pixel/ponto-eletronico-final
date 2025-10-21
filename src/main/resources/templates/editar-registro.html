@@ -12,7 +12,7 @@
 <body>
 <div class="login-card">
     <h1><i class="fa-solid fa-edit"></i> Editar Ponto</h1>
-    <p th:text="'Coordenador: ' + ${registro.usernameCoordenador}" style="margin-bottom: 20px;"></p>
+    <p th:text="'Coordenador: ' + ${registro.usernameCoordenador}" style="margin-bottom: 30px; font-size: 1.1rem; color: #ddd;"></p>
 
     <form th:action="@{/admin/registro/editar/{id}(id=${registro.id})}" method="post">
 
@@ -29,10 +29,22 @@
                    required />
         </div>
 
-        <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Salvar Alterações</button>
+        <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Salvar Alterações</button>
+
         <a th:href="@{/admin/relatorio/{username}(username=${registro.usernameCoordenador})}"
-           class="btn" style="margin-top: 10px; background: #6c757d; text-decoration: none; display: block;">Cancelar</a>
+           class="btn btn-secondary" style="margin-top: 10px; text-decoration: none; display: block;">Cancelar</a>
     </form>
 </div>
+
+<style>
+    .btn-secondary {
+        background: #6c757d; /* Cinza */
+    }
+    .btn-secondary:hover {
+        background: #5a6268;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.3); /* Mantém o efeito hover */
+        transform: translateY(-3px); /* Mantém o efeito hover */
+    }
+</style>
 </body>
 </html>
