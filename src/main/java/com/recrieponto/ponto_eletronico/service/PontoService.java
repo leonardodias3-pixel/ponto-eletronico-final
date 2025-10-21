@@ -59,7 +59,8 @@ public class PontoService {
 
     public Map<String, Double> getHorasTrabalhadasPorDiaDaSemana(String username) {
         Map<String, Double> dadosGrafico = new LinkedHashMap<>();
-        LocalDate hoje = LocalDate.now();
+        // Correção para buscar a hora atual no fuso correto para o gráfico também
+        LocalDate hoje = LocalDate.now(ZoneId.of("America/Sao_Paulo"));
         LocalDateTime seteDiasAtras = hoje.minusDays(6).atStartOfDay();
 
         List<RegistroPonto> registrosDaSemana = registroPontoRepository.findAllByUsernameCoordenadorAndDataHoraEntradaAfter(username, seteDiasAtras);
@@ -95,7 +96,6 @@ public class PontoService {
         registroPontoRepository.save(registro);
     }
 
-    // --- NOVO MÉTODO ADICIONADO ---
     @Transactional
     public void atualizarRegistroCompleto(Long id, LocalDateTime novaEntrada, LocalDateTime novaSaida) {
         RegistroPonto registro = registroPontoRepository.findById(id)
@@ -105,5 +105,14 @@ public class PontoService {
         registro.setDataHoraSaida(novaSaida);
 
         registroPontoRepository.save(registro);
+    }
+
+    // --- NOVO MÉTODO ADICIONADO ---
+    @Transactional
+    public void apagarRegistroPorId(Long id) {
+        if (!registroPontoRepository.existsById(id)) {
+            throw new IllegalArgumentException("Registro de Ponto inválido com ID: " + id);
+        }
+        registroPontoRepository.deleteById(id);
     }
 }

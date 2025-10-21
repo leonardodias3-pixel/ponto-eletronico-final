@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes; // Certifique-se que este import está presente
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -53,18 +53,15 @@ public class AdminController {
         return "relatorio-coordenador";
     }
 
-    // --- MÉTODO CORRIGIDO ---
     @PostMapping("/coordenador/excluir/{username}")
-    public String excluirCoordenador(@PathVariable String username, RedirectAttributes redirectAttributes) { // <-- 1. Adicionado RedirectAttributes
+    public String excluirCoordenador(@PathVariable String username, RedirectAttributes redirectAttributes) {
         try {
             coordenadorService.apagarPorUsername(username);
-            // 2. Adiciona a mensagem de sucesso ANTES de redirecionar
             redirectAttributes.addFlashAttribute("sucesso", "Coordenador '" + username + "' excluído com sucesso!");
         } catch (Exception e) {
-            // (Opcional, mas bom) Adiciona uma mensagem de erro se algo der errado
             redirectAttributes.addFlashAttribute("erro", "Erro ao excluir coordenador: " + e.getMessage());
         }
-        return "redirect:/admin/dashboard"; // Volta para a dashboard do admin
+        return "redirect:/admin/dashboard";
     }
 
     @GetMapping("/registro/editar/{id}")
@@ -113,6 +110,29 @@ public class AdminController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("erro", "Erro ao atualizar registro: " + e.getMessage());
         }
+        return "redirect:/admin/relatorio/" + username;
+    }
+
+    // --- NOVO MÉTODO ADICIONADO ---
+    @PostMapping("/registro/excluir/{id}")
+    public String excluirRegistro(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        String username = pontoService.findRegistroById(id)
+                .map(RegistroPonto::getUsernameCoordenador)
+                .orElse(null);
+
+        if (username == null) {
+            redirectAttributes.addFlashAttribute("erro", "Registro com ID " + id + " não encontrado para exclusão.");
+            // Redireciona para um local seguro, já que não sabemos de quem era o registro
+            return "redirect:/admin/dashboard";
+        }
+
+        try {
+            pontoService.apagarRegistroPorId(id);
+            redirectAttributes.addFlashAttribute("sucesso", "Registro de ponto excluído com sucesso!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("erro", "Erro ao excluir registro: " + e.getMessage());
+        }
+
         return "redirect:/admin/relatorio/" + username;
     }
 }
