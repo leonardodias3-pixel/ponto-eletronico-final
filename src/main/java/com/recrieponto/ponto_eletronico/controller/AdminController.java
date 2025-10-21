@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes; // Certifique-se que este import está presente
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -53,13 +53,20 @@ public class AdminController {
         return "relatorio-coordenador";
     }
 
+    // --- MÉTODO CORRIGIDO ---
     @PostMapping("/coordenador/excluir/{username}")
-    public String excluirCoordenador(@PathVariable String username) {
-        coordenadorService.apagarPorUsername(username);
-        return "redirect:/admin/dashboard";
+    public String excluirCoordenador(@PathVariable String username, RedirectAttributes redirectAttributes) { // <-- 1. Adicionado RedirectAttributes
+        try {
+            coordenadorService.apagarPorUsername(username);
+            // 2. Adiciona a mensagem de sucesso ANTES de redirecionar
+            redirectAttributes.addFlashAttribute("sucesso", "Coordenador '" + username + "' excluído com sucesso!");
+        } catch (Exception e) {
+            // (Opcional, mas bom) Adiciona uma mensagem de erro se algo der errado
+            redirectAttributes.addFlashAttribute("erro", "Erro ao excluir coordenador: " + e.getMessage());
+        }
+        return "redirect:/admin/dashboard"; // Volta para a dashboard do admin
     }
 
-    // --- MÉTODO CORRIGIDO ---
     @GetMapping("/registro/editar/{id}")
     public String mostrarFormularioEdicao(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
         Optional<RegistroPonto> registroOpt = pontoService.findRegistroById(id);
@@ -68,7 +75,6 @@ public class AdminController {
             RegistroPonto registro = registroOpt.get();
             model.addAttribute("registro", registro);
 
-            // --- MUDANÇA AQUI: Pré-formatamos as DUAS datas ---
             String entradaFormatada = "";
             if (registro.getDataHoraEntrada() != null) {
                 entradaFormatada = registro.getDataHoraEntrada().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
@@ -101,8 +107,12 @@ public class AdminController {
         }
 
         String username = registroOpt.get().getUsernameCoordenador();
-        pontoService.atualizarRegistroCompleto(id, novaEntrada, novaSaida);
-        redirectAttributes.addFlashAttribute("sucesso", "Registro de ponto atualizado com sucesso!");
+        try {
+            pontoService.atualizarRegistroCompleto(id, novaEntrada, novaSaida);
+            redirectAttributes.addFlashAttribute("sucesso", "Registro de ponto atualizado com sucesso!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("erro", "Erro ao atualizar registro: " + e.getMessage());
+        }
         return "redirect:/admin/relatorio/" + username;
     }
 }
