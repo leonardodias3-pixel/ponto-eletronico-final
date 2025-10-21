@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId; // Import necessário para validação
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
@@ -84,6 +85,12 @@ public class AdminController {
             }
             model.addAttribute("saidaFormatada", saidaFormatada);
 
+            // Adiciona mensagem de erro se houver uma vinda do redirect da validação
+            // Renomeado para não conflitar com outros erros
+            if (model.containsAttribute("erroValidacaoEdicao")) {
+                model.addAttribute("erro", model.getAttribute("erroValidacaoEdicao"));
+            }
+
             return "editar-registro";
         } else {
             redirectAttributes.addFlashAttribute("erro", "Registro com ID " + id + " não encontrado.");
@@ -102,37 +109,38 @@ public class AdminController {
             redirectAttributes.addFlashAttribute("erro", "Tentativa de salvar registro inexistente.");
             return "redirect:/admin/dashboard";
         }
-
         String username = registroOpt.get().getUsernameCoordenador();
+
+        LocalDateTime agora = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
+
+        // --- VALIDAÇÕES ---
+        if (novaEntrada.isAfter(agora)) {
+            // Usando nome diferente para a mensagem de erro da validação
+            redirectAttributes.addFlashAttribute("erroValidacaoEdicao", "A data/hora de entrada não pode ser no futuro.");
+            redirectAttributes.addAttribute("id", id);
+            return "redirect:/admin/registro/editar/{id}";
+        }
+        if (novaSaida.isAfter(agora)) {
+            redirectAttributes.addFlashAttribute("erroValidacaoEdicao", "A data/hora de saída não pode ser no futuro.");
+            redirectAttributes.addAttribute("id", id);
+            return "redirect:/admin/registro/editar/{id}";
+        }
+        if (novaSaida.isBefore(novaEntrada)) {
+            redirectAttributes.addFlashAttribute("erroValidacaoEdicao", "A data/hora de saída não pode ser anterior à data/hora de entrada.");
+            redirectAttributes.addAttribute("id", id);
+            return "redirect:/admin/registro/editar/{id}";
+        }
+        // --- FIM VALIDAÇÕES ---
+
         try {
             pontoService.atualizarRegistroCompleto(id, novaEntrada, novaSaida);
             redirectAttributes.addFlashAttribute("sucesso", "Registro de ponto atualizado com sucesso!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("erro", "Erro ao atualizar registro: " + e.getMessage());
         }
-        return "redirect:/admin/relatorio/" + username;
-    }
-
-    // --- NOVO MÉTODO ADICIONADO ---
-    @PostMapping("/registro/excluir/{id}")
-    public String excluirRegistro(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        String username = pontoService.findRegistroById(id)
-                .map(RegistroPonto::getUsernameCoordenador)
-                .orElse(null);
-
-        if (username == null) {
-            redirectAttributes.addFlashAttribute("erro", "Registro com ID " + id + " não encontrado para exclusão.");
-            // Redireciona para um local seguro, já que não sabemos de quem era o registro
-            return "redirect:/admin/dashboard";
-        }
-
-        try {
-            pontoService.apagarRegistroPorId(id);
-            redirectAttributes.addFlashAttribute("sucesso", "Registro de ponto excluído com sucesso!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("erro", "Erro ao excluir registro: " + e.getMessage());
-        }
 
         return "redirect:/admin/relatorio/" + username;
     }
+
+    // A parte do PDF foi REMOVIDA desta versão
 }
