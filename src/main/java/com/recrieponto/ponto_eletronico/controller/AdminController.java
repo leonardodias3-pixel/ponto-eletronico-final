@@ -4,10 +4,13 @@ import com.recrieponto.ponto_eletronico.model.Coordenador;
 import com.recrieponto.ponto_eletronico.model.RegistroPonto;
 import com.recrieponto.ponto_eletronico.service.CoordenadorService;
 import com.recrieponto.ponto_eletronico.service.PontoService;
-// Removido import do PdfGenerationService por enquanto
-// import com.recrieponto.ponto_eletronico.service.PdfGenerationService;
+import com.recrieponto.ponto_eletronico.service.PdfGenerationService; // <-- Import do novo serviço
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource; // <-- Imports para PDF
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders; // <-- Imports para PDF
+import org.springframework.http.MediaType; // <-- Imports para PDF
+import org.springframework.http.ResponseEntity; // <-- Imports para PDF
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,13 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-// Removidos imports do PDF por enquanto
-// import org.springframework.core.io.InputStreamResource;
-// import org.springframework.http.HttpHeaders;
-// import org.springframework.http.MediaType;
-// import org.springframework.http.ResponseEntity;
-// import java.io.ByteArrayInputStream;
-
+import java.io.ByteArrayInputStream; // <-- Imports para PDF
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -42,11 +39,12 @@ public class AdminController {
     @Autowired
     private CoordenadorService coordenadorService;
 
-    // Removida injeção do PdfGenerationService por enquanto
-    // @Autowired(required = false)
-    // private PdfGenerationService pdfGenerationService;
+    // --- NOVA INJEÇÃO ---
+    @Autowired
+    private PdfGenerationService pdfGenerationService;
 
-    // Método para mostrar a dashboard do admin (COMPLETO)
+    // --- MÉTODOS EXISTENTES (COMPLETOS) ---
+
     @GetMapping("/dashboard")
     public String mostrarAdminDashboard(Model model, Authentication authentication) {
         model.addAttribute("nomeUsuario", authentication.getName());
@@ -54,7 +52,6 @@ public class AdminController {
         return "admin-dashboard";
     }
 
-    // Método para mostrar o relatório individual (COMPLETO)
     @GetMapping("/relatorio/{username}")
     public String verRelatorioDoCoordenador(@PathVariable String username, Model model) {
         Map<String, Double> dadosGrafico = pontoService.getHorasTrabalhadasPorDiaDaSemana(username);
@@ -69,7 +66,6 @@ public class AdminController {
         return "relatorio-coordenador";
     }
 
-    // Método para excluir um coordenador (COMPLETO)
     @PostMapping("/coordenador/excluir/{username}")
     public String excluirCoordenador(@PathVariable String username, RedirectAttributes redirectAttributes) {
         try {
@@ -81,7 +77,6 @@ public class AdminController {
         return "redirect:/admin/dashboard";
     }
 
-    // Método para mostrar o formulário de edição (COMPLETO E CORRIGIDO)
     @GetMapping("/registro/editar/{id}")
     public String mostrarFormularioEdicao(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
         Optional<RegistroPonto> registroOpt = pontoService.findRegistroById(id);
@@ -102,7 +97,9 @@ public class AdminController {
             }
             model.addAttribute("saidaFormatada", saidaFormatada);
 
-            // Cópia redundante de erro foi REMOVIDA daqui.
+            if (model.containsAttribute("erroValidacaoEdicao")) {
+                model.addAttribute("erro", model.getAttribute("erroValidacaoEdicao"));
+            }
 
             return "editar-registro";
         } else {
@@ -111,7 +108,6 @@ public class AdminController {
         }
     }
 
-    // Método para salvar a edição com validações (COMPLETO E CORRIGIDO)
     @PostMapping("/registro/editar/{id}")
     public String salvarEdicaoRegistro(@PathVariable Long id,
                                        @RequestParam("entrada") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime novaEntrada,
@@ -127,7 +123,6 @@ public class AdminController {
 
         LocalDateTime agora = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"));
 
-        // --- VALIDAÇÕES ---
         if (novaEntrada.isAfter(agora)) {
             redirectAttributes.addFlashAttribute("erroValidacaoEdicao", "A data/hora de entrada não pode ser no futuro.");
             redirectAttributes.addAttribute("id", id);
@@ -143,7 +138,6 @@ public class AdminController {
             redirectAttributes.addAttribute("id", id);
             return "redirect:/admin/registro/editar/{id}";
         }
-        // --- FIM VALIDAÇÕES ---
 
         try {
             pontoService.atualizarRegistroCompleto(id, novaEntrada, novaSaida);
@@ -155,7 +149,6 @@ public class AdminController {
         return "redirect:/admin/relatorio/" + username;
     }
 
-    // Método para excluir um registro (COMPLETO)
     @PostMapping("/registro/excluir/{id}")
     public String excluirRegistro(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         String username = pontoService.findRegistroById(id)
@@ -177,5 +170,25 @@ public class AdminController {
         return "redirect:/admin/relatorio/" + username;
     }
 
-    // A parte do PDF foi REMOVIDA para evitar erros
+    // --- NOVO MÉTODO ADICIONADO PARA O PDF ---
+    @GetMapping("/relatorio/{username}/pdf")
+    public ResponseEntity<InputStreamResource> gerarRelatorioPdf(@PathVariable String username) {
+        // Busca os registros do usuário
+        List<RegistroPonto> registros = pontoService.getRegistrosDoUsuario(username);
+
+        // Gera o PDF em memória
+        ByteArrayInputStream pdfStream = pdfGenerationService.generatePdfReport(registros, username);
+
+        // Configura os cabeçalhos da resposta para indicar que é um download de PDF
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=relatorio-" + username + ".pdf");
+        headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_PDF_VALUE);
+
+        // Retorna a resposta com o PDF
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(new InputStreamResource(pdfStream));
+    }
 }

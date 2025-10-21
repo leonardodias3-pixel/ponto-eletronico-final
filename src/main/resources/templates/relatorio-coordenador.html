@@ -19,7 +19,7 @@
         <div class="user-info">
             <a th:href="@{/admin/relatorio/{username}/pdf(username=${nomeUsuario})}"
                class="btn-action" style="background-color: #198754; text-decoration: none;" title="Gerar PDF">
-                <i class="fa-solid fa-file-pdf"></i>
+                <i class="fa-solid fa-file-pdf"></i> Gerar PDF
             </a>
             <a href="/admin/dashboard" style="color: #a7b5ff; text-decoration: none;" title="Voltar"><i class="fa-solid fa-arrow-left"></i> Voltar</a>
             <a href="/logout" title="Sair"><i class="fa-solid fa-right-from-bracket"></i> Sair</a>
@@ -85,6 +85,7 @@
 
 <script th:inline="javascript">
     /*<![CDATA[*/
+    // ... (Script do gráfico completo) ...
     const weeklyData = /*[[${dadosGraficoSemanal}]]*/ {};
     const labels = Object.keys(weeklyData);
     const dataValues = Object.values(weeklyData);
@@ -103,6 +104,7 @@
 <style>
     .btn-action.btn-warning { background-color: #ffc107; color: #333; }
     .btn-action.btn-danger { background-color: #dc3545; }
+    /* Adiciona estilo para o botão PDF se precisar, mas .btn-action já deve bastar */
 </style>
 </body>
 </html>
